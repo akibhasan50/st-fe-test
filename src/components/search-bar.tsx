@@ -9,7 +9,7 @@ interface SearchBarProps {
 export function SearchBar({ value, onChange, className }: SearchBarProps) {
   return (
     <div className={`glass-panel flex items-center px-6 h-[48px] rounded-full ${className || ""}`}>
-      <Search size={20} className="mr-3 text-[var(--text-muted)] shrink-0" />
+      <Search size={20} className="mr-3 text-muted-foreground shrink-0" />
       <input
         type="text"
         placeholder="Search products..."

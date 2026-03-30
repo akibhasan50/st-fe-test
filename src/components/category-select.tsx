@@ -26,7 +26,7 @@ export function CategorySelect({ value, onChange, className }: CategorySelectPro
     <Select value={value} onValueChange={(val) => onChange(val || "")}>
       <SelectTrigger 
         className={cn(
-          "glass-panel px-6 h-[48px] w-[220px] text-[var(--text-main)] text-base rounded-full !ring-0 focus:!ring-0 border-[var(--border)] flex justify-between items-center",
+          "glass-panel px-6 h-[48px] w-[220px] text-[var(--text-main)] text-muted-foreground rounded-full !ring-0 focus:!ring-0 border-[var(--border)] flex justify-between items-center",
           className
         )}
       >
