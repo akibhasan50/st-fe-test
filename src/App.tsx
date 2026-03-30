@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useTransition } from "react"
 import { Header } from "@/components/header"
 import { SearchBar } from "@/components/search-bar"
 import { CategorySelect } from "@/components/category-select"
@@ -8,17 +8,21 @@ import { useProducts } from "@/hooks/use-products"
 import { useDebounce } from "@/hooks/use-debounce"
 
 function App() {
-  const [search, setSearch] = useState("")
-  const [category, setCategory] = useState("")
+  const [searchInput, setSearchInput] = useState("")
+  const [categoryInput, setCategoryInput] = useState("")
   const [page, setPage] = useState(1)
   const [isScrolled, setIsScrolled] = useState(false)
   
-  const debouncedSearch = useDebounce(search, 500)
+  // useTransition for non-blocking async updates
+  const [isPending, startTransition] = useTransition()
+  
+  // Debounce the actual search value sent to API
+  const debouncedSearch = useDebounce(searchInput, 500)
 
   // Reset page when filters change
   useEffect(() => {
     setPage(1)
-  }, [debouncedSearch, category])
+  }, [debouncedSearch, categoryInput])
 
   // Track scroll position for enhanced sticky styling
   useEffect(() => {
@@ -34,13 +38,34 @@ function App() {
     isLoading, 
     error, 
     refetch,
-    isPlaceholderData 
+    isFetching
   } = useProducts({
     page,
     limit: 12,
     search: debouncedSearch,
-    category
+    category: categoryInput
   })
+
+  // Handle search with non-blocking transition
+  const handleSearch = (value: string) => {
+    startTransition(() => {
+      setSearchInput(value)
+    })
+  }
+
+  // Handle category change with non-blocking transition
+  const handleCategoryChange = (value: string) => {
+    startTransition(() => {
+      setCategoryInput(value)
+    })
+  }
+
+  // Handle retry with transition
+  const handleRetry = () => {
+    startTransition(() => {
+      refetch()
+    })
+  }
 
   return (
     <div className="min-h-screen p-8 bg-[var(--background)] text-[var(--text-main)]">
@@ -58,24 +83,30 @@ function App() {
         }
       `}>
         <SearchBar
-          value={search}
-          onChange={setSearch}
-          className="flex-1 max-w-md shadow-lg shadow-black/5 transition-all duration-300"
+          value={searchInput}
+          onChange={handleSearch}
+          className={`flex-1 max-w-md shadow-lg shadow-black/5 transition-all duration-300 ${
+            (isPending || isFetching) ? "ring-2 ring-primary/30" : ""
+          }`}
         />
 
         <CategorySelect
-          value={category}
-          onChange={setCategory}
-          className="transition-all duration-300 shadow-lg shadow-black/5"
+          value={categoryInput}
+          onChange={handleCategoryChange}
+          className={`transition-all duration-300 shadow-lg shadow-black/5 ${
+            (isPending || isFetching) ? "ring-2 ring-primary/30" : ""
+          }`}
         />
       </section>
 
-      <main className={isPlaceholderData ? "opacity-50 transition-opacity" : "transition-opacity"}>
+      <main className={`transition-opacity duration-200 ${
+        isFetching ? "opacity-50" : "opacity-100"
+      }`}>
         <ProductGrid 
           products={data?.data} 
           isLoading={isLoading} 
           error={error as Error}
-          onRetry={() => refetch()}
+          onRetry={handleRetry}
         />
         
         {data && (
