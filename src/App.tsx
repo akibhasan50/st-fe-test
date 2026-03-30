@@ -2,10 +2,49 @@ import { useState, useEffect, useTransition } from "react"
 import { Header } from "@/components/header"
 import { SearchBar } from "@/components/search-bar"
 import { CategorySelect } from "@/components/category-select"
-import { ProductGrid } from "@/components/product-grid"
+import { ProductGrid, ProductGridSkeleton, ProductGridError } from "@/components/product-grid"
 import { Pagination } from "@/components/pagination"
 import { useProducts } from "@/hooks/use-products"
 import { useDebounce } from "@/hooks/use-debounce"
+
+function ProductListContent({ 
+  debouncedSearch, 
+  categoryInput, 
+  page, 
+  onPageChange,
+  isFetching
+}: {
+  debouncedSearch: string
+  categoryInput: string
+  page: number
+  onPageChange: (p: number) => void
+  isFetching: boolean
+}) {
+  const { data, isLoading } = useProducts({
+    page,
+    limit: 12,
+    search: debouncedSearch,
+    category: categoryInput
+  })
+
+  // Show skeleton only on initial load, not on filter changes
+  if (isLoading && !data) {
+    return <ProductGridSkeleton />
+  }
+
+  return (
+    <>
+      {data && <ProductGrid data={data} isRefetching={isFetching} />}
+      {data && (
+        <Pagination
+          currentPage={page}
+          totalPages={data.totalPages}
+          onPageChange={onPageChange}
+        />
+      )}
+    </>
+  )
+}
 
 function App() {
   const [searchInput, setSearchInput] = useState("")
@@ -33,11 +72,9 @@ function App() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // Keep the hook for checking errors and fetching state
   const { 
-    data, 
-    isLoading, 
-    error, 
-    refetch,
+    error,
     isFetching
   } = useProducts({
     page,
@@ -63,7 +100,9 @@ function App() {
   // Handle retry with transition
   const handleRetry = () => {
     startTransition(() => {
-      refetch()
+      setPage(1)
+      setSearchInput("")
+      setCategoryInput("")
     })
   }
 
@@ -102,18 +141,15 @@ function App() {
       <main className={`transition-opacity duration-200 ${
         isFetching ? "opacity-50" : "opacity-100"
       }`}>
-        <ProductGrid 
-          products={data?.data} 
-          isLoading={isLoading} 
-          error={error as Error}
-          onRetry={handleRetry}
-        />
-        
-        {data && (
-          <Pagination
-            currentPage={page}
-            totalPages={data.totalPages}
+        {error ? (
+          <ProductGridError error={error} onRetry={handleRetry} />
+        ) : (
+          <ProductListContent
+            debouncedSearch={debouncedSearch}
+            categoryInput={categoryInput}
+            page={page}
             onPageChange={setPage}
+            isFetching={isFetching}
           />
         )}
       </main>
