@@ -11,6 +11,7 @@ function App() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("")
   const [page, setPage] = useState(1)
+  const [isScrolled, setIsScrolled] = useState(false)
   
   const debouncedSearch = useDebounce(search, 500)
 
@@ -18,6 +19,15 @@ function App() {
   useEffect(() => {
     setPage(1)
   }, [debouncedSearch, category])
+
+  // Track scroll position for enhanced sticky styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const { 
     data, 
@@ -39,17 +49,24 @@ function App() {
         description="Browse our collection. Handling the flaky API gracefully is part of the challenge."
       />
 
-      <section className="flex flex-col sm:flex-row gap-4 mb-8 sticky top-8 z-10">
+      <section className={`
+        flex flex-col sm:flex-row gap-4 mb-8 sticky top-0 z-10
+        transition-all duration-300 ease-out
+        ${isScrolled 
+          ? "bg-white/40 dark:bg-slate-950/60 backdrop-blur-lg rounded-2xl p-4 shadow-2xl shadow-black/10 border border-white/20" 
+          : "p-0 rounded-none bg-transparent shadow-none border-none"
+        }
+      `}>
         <SearchBar
           value={search}
           onChange={setSearch}
-          className="flex-1 max-w-md shadow-lg shadow-black/5"
+          className="flex-1 max-w-md shadow-lg shadow-black/5 transition-all duration-300"
         />
 
         <CategorySelect
           value={category}
           onChange={setCategory}
-          className="shadow-lg shadow-black/5"
+          className="transition-all duration-300 shadow-lg shadow-black/5"
         />
       </section>
 
