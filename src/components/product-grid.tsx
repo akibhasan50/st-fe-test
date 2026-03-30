@@ -23,7 +23,7 @@ export function ProductGrid({ data, isRefetching = false }: ProductGridProps) {
   }
 
   return (
-    <div className="relative">
+    <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
         {data.data.map((product) => (
           <Card key={product.id} className="overflow-hidden glass-card group">
@@ -59,7 +59,7 @@ export function ProductGrid({ data, isRefetching = false }: ProductGridProps) {
         ))}
       </div>
       {isRefetching && <ShimmerOverlay isVisible message="Updating results..." />}
-    </div>
+    </>
   );
 }
 

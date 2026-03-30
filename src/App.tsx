@@ -1,4 +1,4 @@
-import { useState, useEffect, useTransition } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Header } from "@/components/header"
 import { SearchBar } from "@/components/search-bar"
 import { CategorySelect } from "@/components/category-select"
@@ -6,6 +6,7 @@ import { ProductGrid, ProductGridSkeleton, ProductGridError } from "@/components
 import { Pagination } from "@/components/pagination"
 import { useProducts } from "@/hooks/use-products"
 import { useDebounce } from "@/hooks/use-debounce"
+import { useURLState } from "@/hooks/use-url-state"
 
 function ProductListContent({ 
   debouncedSearch, 
@@ -51,9 +52,24 @@ function App() {
   const [categoryInput, setCategoryInput] = useState("")
   const [page, setPage] = useState(1)
   const [isScrolled, setIsScrolled] = useState(false)
+  const isInitialized = useRef(false)
   
-  // useTransition for non-blocking async updates
-  const [isPending, startTransition] = useTransition()
+  // Get URL state management
+  const { getStateFromURL, updateURL } = useURLState((state) => {
+    setSearchInput(state.search || "")
+    setCategoryInput(state.category || "")
+    setPage(1)
+  })
+
+  // Initialize from URL on first load (once)
+  useEffect(() => {
+    if (!isInitialized.current) {
+      const urlState = getStateFromURL()
+      setSearchInput(urlState.search || "")
+      setCategoryInput(urlState.category || "")
+      isInitialized.current = true
+    }
+  }, [])
   
   // Debounce the actual search value sent to API
   const debouncedSearch = useDebounce(searchInput, 500)
@@ -63,16 +79,30 @@ function App() {
     setPage(1)
   }, [debouncedSearch, categoryInput])
 
-  // Track scroll position for enhanced sticky styling
+  // Track scroll position for enhanced sticky styling (with throttling)
   useEffect(() => {
+    let rafId: number
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+      rafId = requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 50)
+      })
     }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      cancelAnimationFrame(rafId)
+    }
   }, [])
 
-  // Keep the hook for checking errors and fetching state
+  // Update URL when search or category changes
+  useEffect(() => {
+    updateURL({
+      search: searchInput,
+      category: categoryInput,
+    })
+  }, [searchInput, categoryInput, updateURL])
+
+  // Single hook call for data fetching
   const { 
     error,
     isFetching
@@ -83,27 +113,21 @@ function App() {
     category: categoryInput
   })
 
-  // Handle search with non-blocking transition
+  // Handle search
   const handleSearch = (value: string) => {
-    startTransition(() => {
-      setSearchInput(value)
-    })
+    setSearchInput(value)
   }
 
-  // Handle category change with non-blocking transition
+  // Handle category change
   const handleCategoryChange = (value: string) => {
-    startTransition(() => {
-      setCategoryInput(value)
-    })
+    setCategoryInput(value)
   }
 
-  // Handle retry with transition
+  // Handle retry
   const handleRetry = () => {
-    startTransition(() => {
-      setPage(1)
-      setSearchInput("")
-      setCategoryInput("")
-    })
+    setPage(1)
+    setSearchInput("")
+    setCategoryInput("")
   }
 
   return (
@@ -125,7 +149,7 @@ function App() {
           value={searchInput}
           onChange={handleSearch}
           className={`flex-1 max-w-md shadow-lg shadow-black/5 transition-all duration-300 ${
-            (isPending || isFetching) ? "ring-2 ring-primary/30" : ""
+            isFetching ? "ring-2 ring-primary/30" : ""
           }`}
         />
 
@@ -133,7 +157,7 @@ function App() {
           value={categoryInput}
           onChange={handleCategoryChange}
           className={`transition-all duration-300 shadow-lg shadow-black/5 ${
-            (isPending || isFetching) ? "ring-2 ring-primary/30" : ""
+            isFetching ? "ring-2 ring-primary/30" : ""
           }`}
         />
       </section>
