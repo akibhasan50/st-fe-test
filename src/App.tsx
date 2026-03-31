@@ -8,10 +8,10 @@ import { useProducts } from "@/hooks/useProducts"
 import { useDebounce } from "@/hooks/useDebounce"
 import { useURLState } from "@/hooks/useUrlState"
 
-function ProductListContent({ 
-  debouncedSearch, 
-  categoryInput, 
-  page, 
+function ProductListContent({
+  debouncedSearch,
+  categoryInput,
+  page,
   onPageChange,
   isFetching
 }: {
@@ -52,32 +52,36 @@ function App() {
   const [categoryInput, setCategoryInput] = useState("")
   const [page, setPage] = useState(1)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [prevSearch, setPrevSearch] = useState("")
+  const [prevCategory, setPrevCategory] = useState("")
   const isInitialized = useRef(false)
-  
-  // Get URL state management
-  const { getStateFromURL, updateURL } = useURLState((state) => {
+
+  // Initialize from URL on first load (once)
+  useEffect(() => {
+    if (!isInitialized.current) {
+      isInitialized.current = true
+    }
+  }, [])
+
+  // Get URL state management with state callback
+  const { updateURL } = useURLState((state) => {
+    if (isInitialized.current) return
     setSearchInput(state.search || "")
     setCategoryInput(state.category || "")
     setPage(1)
   })
 
-  // Initialize from URL on first load (once)
-  useEffect(() => {
-    if (!isInitialized.current) {
-      const urlState = getStateFromURL()
-      setSearchInput(urlState.search || "")
-      setCategoryInput(urlState.category || "")
-      isInitialized.current = true
-    }
-  }, [])
-  
   // Debounce the actual search value sent to API
   const debouncedSearch = useDebounce(searchInput, 500)
 
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch, categoryInput])
+  // Reset page when filters change - this is intentional UX behavior
+  if (debouncedSearch !== prevSearch || categoryInput !== prevCategory) {
+    setPrevSearch(debouncedSearch)
+    setPrevCategory(categoryInput)
+    if (page !== 1) {
+      setPage(1)
+    }
+  }
 
   // Track scroll position for enhanced sticky styling (with throttling)
   useEffect(() => {
@@ -103,7 +107,7 @@ function App() {
   }, [searchInput, categoryInput, updateURL])
 
   // Single hook call for data fetching
-  const { 
+  const {
     error,
     isFetching
   } = useProducts({
@@ -140,31 +144,28 @@ function App() {
       <section className={`
         flex flex-col sm:flex-row gap-4 mb-8 sticky top-0 z-10
         transition-all duration-300 ease-out
-        ${isScrolled 
-          ? "bg-white/40 dark:bg-slate-950/60 backdrop-blur-lg rounded-2xl p-4 shadow-2xl shadow-black/10 border border-white/20" 
+        ${isScrolled
+          ? "bg-white/40 dark:bg-slate-950/60 backdrop-blur-lg rounded-2xl p-4 shadow-2xl shadow-black/10 border border-white/20"
           : "p-0 rounded-none bg-transparent shadow-none border-none"
         }
       `}>
         <SearchBar
           value={searchInput}
           onChange={handleSearch}
-          className={`flex-1 max-w-md shadow-lg shadow-black/5 transition-all duration-300 ${
-            isFetching ? "ring-2 ring-primary/30" : ""
-          }`}
+          className={`flex-1 max-w-md shadow-lg shadow-black/5 transition-all duration-300 ${isFetching ? "ring-2 ring-primary/30" : ""
+            }`}
         />
 
         <CategorySelect
           value={categoryInput}
           onChange={handleCategoryChange}
-          className={`transition-all duration-300 shadow-lg shadow-black/5 ${
-            isFetching ? "ring-2 ring-primary/30" : ""
-          }`}
+          className={`transition-all duration-300 shadow-lg shadow-black/5 ${isFetching ? "ring-2 ring-primary/30" : ""
+            }`}
         />
       </section>
 
-      <main className={`transition-opacity duration-200 ${
-        isFetching ? "opacity-50" : "opacity-100"
-      }`}>
+      <main className={`transition-opacity duration-200 ${isFetching ? "opacity-50" : "opacity-100"
+        }`}>
         {error ? (
           <ProductGridError error={error} onRetry={handleRetry} />
         ) : (
