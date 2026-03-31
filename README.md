@@ -1,6 +1,6 @@
 # Frontend - Round One
 
-Welcome! Thank you for applying. This async take-home assignment is designed to see how you build, debug, and make decisions in a realistic frontend environment.
+Implemented by Akib Hasan
 
 ## The Scenario
 
