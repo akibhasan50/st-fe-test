@@ -1,6 +1,6 @@
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface PaginationProps {
   currentPage: number;
@@ -38,10 +38,15 @@ export function Pagination({
           onClick={() => onPageChange(1)}
         >
           1
-        </Button>
+        </Button>,
       );
       if (startPage > 2) {
-        pages.push(<MoreHorizontal key="start-ellipsis" className="h-4 w-4 text-muted-foreground mx-1" />);
+        pages.push(
+          <MoreHorizontal
+            key="start-ellipsis"
+            className="h-4 w-4 text-muted-foreground mx-1"
+          />,
+        );
       }
     }
 
@@ -49,22 +54,27 @@ export function Pagination({
       pages.push(
         <Button
           key={i}
-          variant={currentPage === i ? "default" : "ghost"}
+          variant={currentPage === i ? 'default' : 'ghost'}
           size="icon"
           className={cn(
-            "h-9 w-9 rounded-lg transition-all",
-            currentPage === i ? "shadow-md scale-105" : ""
+            'h-9 w-9 rounded-lg transition-all',
+            currentPage === i ? 'shadow-md scale-105' : '',
           )}
           onClick={() => onPageChange(i)}
         >
           {i}
-        </Button>
+        </Button>,
       );
     }
 
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
-        pages.push(<MoreHorizontal key="end-ellipsis" className="h-4 w-4 text-muted-foreground mx-1" />);
+        pages.push(
+          <MoreHorizontal
+            key="end-ellipsis"
+            className="h-4 w-4 text-muted-foreground mx-1"
+          />,
+        );
       }
       pages.push(
         <Button
@@ -75,7 +85,7 @@ export function Pagination({
           onClick={() => onPageChange(totalPages)}
         >
           {totalPages}
-        </Button>
+        </Button>,
       );
     }
 
@@ -83,7 +93,12 @@ export function Pagination({
   };
 
   return (
-    <div className={cn("flex items-center justify-center gap-2 mt-12 mb-8", className)}>
+    <div
+      className={cn(
+        'flex items-center justify-center gap-2 mt-12 mb-8',
+        className,
+      )}
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -93,7 +108,7 @@ export function Pagination({
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      
+
       <div className="flex items-center gap-1 glass-panel px-2 py-1 rounded-xl border border-border/50">
         {renderPageButtons()}
       </div>
