@@ -3,22 +3,11 @@ import type { Product } from "@/types/product";
 
 interface ProductCardProps {
   product: Product;
-  onViewDetails?: (productId: string) => void;
 }
 
-export function ProductCard({ product, onViewDetails }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   return (
-    <Card 
-      className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer rounded-card ring-0"
-      onClick={() => onViewDetails?.(product.id)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onViewDetails?.(product.id);
-        }
-      }}
-    >
+    <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow duration-300 rounded-card ring-0">
       <div className="flex flex-col h-full">
         {/* Image Container */}
         <div className="relative w-full overflow-hidden bg-[var(--surface-hover)] rounded-card" style={{ paddingBottom: '100%' }}>

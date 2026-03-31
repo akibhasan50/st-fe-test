@@ -5,13 +5,11 @@ import type { Product, PaginatedResponse } from "../../types/product";
 interface ProductGridProps {
   data: PaginatedResponse<Product>;
   isRefetching?: boolean;
-  onViewDetails?: (productId: string) => void;
 }
 
 export function ProductGrid({ 
   data, 
   isRefetching = false,
-  onViewDetails
 }: ProductGridProps) {
   // Early return for empty state
   if (data.data.length === 0) {
@@ -31,11 +29,7 @@ export function ProductGrid({
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
         {data.data.map((product) => (
-          <ProductCard 
-            key={product.id} 
-            product={product}
-            onViewDetails={onViewDetails}
-          />
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
       {isRefetching && <ShimmerOverlay isVisible message="Updating results..." />}
