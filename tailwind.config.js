@@ -58,6 +58,7 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        card: "6px 6px 4px 4px",
       },
       keyframes: {
         shimmer: {
