@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 
 interface UseURLStateOptions {
   search?: string;
@@ -8,8 +8,8 @@ interface UseURLStateOptions {
 export function useURLState(
   onStateChange: (state: UseURLStateOptions) => void
 ) {
-  // Get initial state from URL
-  const getStateFromURL = useCallback((): UseURLStateOptions => {
+  // Get initial state from URL - React 19 compiler optimizes this automatically
+  const getStateFromURL = (): UseURLStateOptions => {
     if (typeof window === "undefined") return {};
     
     const params = new URLSearchParams(window.location.search);
@@ -17,10 +17,10 @@ export function useURLState(
       search: params.get("search") || "",
       category: params.get("category") || "",
     };
-  }, []);
+  };
 
   // Update URL without page reload
-  const updateURL = useCallback((state: UseURLStateOptions) => {
+  const updateURL = (state: UseURLStateOptions) => {
     if (typeof window === "undefined") return;
 
     const params = new URLSearchParams();
@@ -38,18 +38,17 @@ export function useURLState(
       : window.location.pathname;
 
     window.history.replaceState(null, "", newURL);
-  }, []);
+  };
 
   // Listen for browser back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
-      const state = getStateFromURL();
-      onStateChange(state);
+      onStateChange(getStateFromURL());
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [getStateFromURL, onStateChange]);
+  }, [onStateChange]);
 
   return {
     getStateFromURL,

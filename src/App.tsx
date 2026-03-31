@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react"
-import { Header } from "@/components/header"
-import { SearchBar } from "@/components/search-bar"
-import { CategorySelect } from "@/components/category-select"
-import { ProductGrid, ProductGridSkeleton, ProductGridError } from "@/components/product-grid"
-import { Pagination } from "@/components/pagination"
-import { useProducts } from "@/hooks/use-products"
-import { useDebounce } from "@/hooks/use-debounce"
-import { useURLState } from "@/hooks/use-url-state"
+import { Header } from "@/components/Header"
+import { SearchBar } from "@/components/SearchBar"
+import { CategorySelect } from "@/components/CategorySelect"
+import { ProductGrid, ProductGridSkeleton, ProductGridError } from "@/components/ProductGrid"
+import { Pagination } from "@/components/Pagination"
+import { useProducts } from "@/hooks/useProducts"
+import { useDebounce } from "@/hooks/useDebounce"
+import { useURLState } from "@/hooks/useUrlState"
 
 function ProductListContent({ 
   debouncedSearch, 
