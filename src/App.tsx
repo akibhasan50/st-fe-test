@@ -152,7 +152,7 @@ function App() {
         <SearchBar
           value={searchInput}
           onChange={handleSearch}
-          className={`flex-1 max-w-md shadow-lg shadow-black/5 transition-all duration-300 ${isFetching ? "ring-2 ring-primary/30" : ""
+          className={`flex-1 sm:max-w-md shadow-lg shadow-black/5 transition-all duration-300 ${isFetching ? "ring-2 ring-primary/30" : ""
             }`}
         />
 

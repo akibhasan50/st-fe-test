@@ -3,9 +3,12 @@ import type { Product } from "@/types/product";
 
 interface ProductCardProps {
   product: Product;
+  index?: number;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const isAboveFold = index < 4;
+
   return (
     <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow duration-300 rounded-card ring-0">
       <div className="flex flex-col h-full">
@@ -15,8 +18,9 @@ export function ProductCard({ product }: ProductCardProps) {
             src={product.imageUrl} 
             alt={product.name} 
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105 rounded-sm"
-            loading="lazy"
-            decoding="async"
+            loading={isAboveFold ? "eager" : "lazy"}
+            decoding={isAboveFold ? "sync" : "async"}
+            fetchPriority={isAboveFold ? "high" : "auto"}
           />
         </div>
 
